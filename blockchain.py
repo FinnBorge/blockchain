@@ -15,7 +15,7 @@ class Blockchain(object):
         # Create the genesis block
         self.new_block(previous_hash=1, proof=100)
 
-    def new_block(self):
+    def new_block(self, proof, previous_hash=None):
         """
         Create a new Block in the Blockchain
 
@@ -29,7 +29,7 @@ class Blockchain(object):
             'timestamp': time(),
             'transactions': self.current_transactions,
             'proof': proof,
-            'previous_hash': previous_hash or self.has(self.chain[-1]),
+            'previous_hash': previous_hash or self.hash(self.chain[-1]),
         }
 
         # Reset the current list of transactions
@@ -94,7 +94,7 @@ class Blockchain(object):
         :return: <bool> True if correct, False if not
         """
 
-        guess = f'{last_proof}{proof}'.encode()
+        guess = '{last_proof}{proof}'.format(last_proof=last_proof, proof=proof).encode()
         guess_hash = hashlib.sha256(guess).hexdigest()
         return guess_hash[:4] == "0000"
 
@@ -146,9 +146,9 @@ def new_transaction():
         return 'Missing values', 400
 
     # Create a new Transaction
-    index = blockchain.new_transaction(values['sender'], values['recipient'], values['amount']
+    index = blockchain.new_transaction(values['sender'], values['recipient'], values['amount'])
 
-    response = {'message': f'Transaction will be added to Block {index}'}
+    response = {'message': 'Transaction will be added to Block {}'.format(index)}
     return jsonify(response), 201
 
 @app.route('/chain', methods=['GET'])
